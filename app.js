@@ -20,20 +20,29 @@ connectToDb((err) => {
 
 //routes
 
-app.get('/api', (req, res) => {
+app.get('/size', (req, res) => {
     let books;
-    db.collection('books').find()
-        .toArray((err, data) => {
-            if (!err) {
-                books = data;
-                res.status(200).send(books)
-                
-            }
-            else {
-                res.status(500)
-            }
-        })
+    db.collection('mali').count({}, (err, cnt) => {
+        if (err) {
+            console.log(err) 
+        } else {
+            books = cnt
+            //console.log(cnt)
+            console.log(books)
+            res.json(books)
+        }
+    })
+})
 
-    
-    
+const RECORDS_PER_PAGE = 10000;
+app.get('/api', (req, res) => {
+    let page = req.query.p
+    db.collection('mali').find().skip(page*RECORDS_PER_PAGE).limit(RECORDS_PER_PAGE).toArray((err, data) => {
+        if (err) {
+            console.log(err)
+        } else {
+            res.json(data)
+        }
+    } )
+
 })
