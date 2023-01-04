@@ -33,16 +33,40 @@ app.get('/size', (req, res) => {
         }
     })
 })
+const C_NAME = 'mali'
+const RECORDS_PER_PAGE = 1000000;
 
-const RECORDS_PER_PAGE = 10000;
-app.get('/api', (req, res) => {
-    let page = req.query.p
-    db.collection('mali').find().skip(page*RECORDS_PER_PAGE).limit(RECORDS_PER_PAGE).toArray((err, data) => {
-        if (err) {
-            console.log(err)
-        } else {
-            res.json(data)
-        }
-    } )
+app.get('/pageData', (req, response) => {
+    
+    let stream = db.collection(C_NAME).find().limit(RECORDS_PER_PAGE).stream();
+    let first = true;
+    response.write('[')
+    stream.on('data', function(item) {
+        let prefix = first ? "" : ","
+        response.write(prefix + JSON.stringify(item));
+        first = false;
+        //response.write(item)
+      });
+      stream.on('end', function() {
+        response.write(']')
+        response.end();
+      });
+
+})
+app.get('/allData', (req, response) => {
+    
+    let stream = db.collection(C_NAME).find().stream();
+    let first = true;
+    response.write('[')
+    stream.on('data', function(item) {
+        let prefix = first ? "" : ","
+        response.write(prefix + JSON.stringify(item));
+        first = false;
+        //response.write(item)
+      });
+      stream.on('end', function() {
+        response.write(']')
+        response.end();
+      });
 
 })
